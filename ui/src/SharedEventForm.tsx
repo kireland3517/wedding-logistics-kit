@@ -1,18 +1,26 @@
-import type { FormInputs } from "./App";
-import type { VibeLevel, BarType, ServiceStyle } from "@engine/types";
+import type { VibeLevel } from "@engine/types";
 
-interface Props {
-  inputs: FormInputs;
-  onChange: (next: FormInputs) => void;
+export interface SharedInputs {
+  totalGuests: number;
+  percentNonDrinkers: number;
+  eventHours: number;
+  startTime: string;
+  vibeLevel: VibeLevel;
+  earlyExitRate: number;
 }
 
-export default function BarForm({ inputs, onChange }: Props) {
-  function set<K extends keyof FormInputs>(field: K, value: FormInputs[K]) {
+interface Props {
+  inputs: SharedInputs;
+  onChange: (next: SharedInputs) => void;
+}
+
+export default function SharedEventForm({ inputs, onChange }: Props) {
+  function set<K extends keyof SharedInputs>(field: K, value: SharedInputs[K]) {
     onChange({ ...inputs, [field]: value });
   }
 
   return (
-    <form className="bar-form" onSubmit={(e) => e.preventDefault()}>
+    <>
       <section className="form-section">
         <h2 className="section-title">Guest Details</h2>
 
@@ -90,34 +98,7 @@ export default function BarForm({ inputs, onChange }: Props) {
         </div>
 
         <div className="field">
-          <label htmlFor="state">State</label>
-          <input
-            id="state"
-            type="text"
-            placeholder="e.g. Texas"
-            value={inputs.state}
-            onChange={(e) => set("state", e.target.value)}
-          />
-        </div>
-
-        <div className="field field-checkbox">
-          <label htmlFor="onSiteLodging">
-            <input
-              id="onSiteLodging"
-              type="checkbox"
-              checked={inputs.onSiteLodging}
-              onChange={(e) => set("onSiteLodging", e.target.checked)}
-            />
-            Guests staying on-site overnight
-          </label>
-        </div>
-      </section>
-
-      <section className="form-section">
-        <h2 className="section-title">Bar Setup</h2>
-
-        <div className="field">
-          <label>Vibe</label>
+          <label>Crowd Vibe</label>
           <div className="radio-group">
             {(["conservative", "standard", "party"] as VibeLevel[]).map((v) => (
               <label key={v} className="radio-option">
@@ -134,50 +115,7 @@ export default function BarForm({ inputs, onChange }: Props) {
           </div>
           <p className="field-hint">Conservative = 1 drink/hr · Standard = 1.5 · Party = 2</p>
         </div>
-
-        <div className="field">
-          <label>Bar Type</label>
-          <div className="radio-group">
-            {([
-              ["full", "Full Bar"],
-              ["beer_wine", "Beer & Wine"],
-              ["limited_spirits", "Limited Spirits"],
-            ] as [BarType, string][]).map(([v, label]) => (
-              <label key={v} className="radio-option">
-                <input
-                  type="radio"
-                  name="barType"
-                  value={v}
-                  checked={inputs.barType === v}
-                  onChange={() => set("barType", v)}
-                />
-                <span>{label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <div className="field">
-          <label>Service Style</label>
-          <div className="radio-group">
-            {([
-              ["bartender", "Bartender (5 pours/bottle)"],
-              ["self_pour", "Self Pour (4 pours/bottle)"],
-            ] as [ServiceStyle, string][]).map(([v, label]) => (
-              <label key={v} className="radio-option">
-                <input
-                  type="radio"
-                  name="serviceStyle"
-                  value={v}
-                  checked={inputs.serviceStyle === v}
-                  onChange={() => set("serviceStyle", v)}
-                />
-                <span>{label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
       </section>
-    </form>
+    </>
   );
 }

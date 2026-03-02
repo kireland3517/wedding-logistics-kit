@@ -1,47 +1,64 @@
 import { useState, useMemo } from "react";
-import { calculateBar, ValidationError } from "@engine/index";
-import type { BarOutput } from "@engine/index";
-import type { VibeLevel, BarType, ServiceStyle } from "@engine/types";
-import BarForm from "./BarForm";
+import { calculateBar, calculatePackages, ValidationError } from "@engine/index";
+import type { BarOutput, PackageOutput, VenuePackage } from "@engine/index";
+import ModeToggle, { type Mode } from "./ModeToggle";
+import SharedEventForm, { type SharedInputs } from "./SharedEventForm";
+import DiyBarForm, { type DiyInputs } from "./DiyBarForm";
 import BarResults from "./BarResults";
+import PackageForm from "./PackageForm";
+import PackageResults from "./PackageResults";
 
-export interface FormInputs {
-  totalGuests: number;
-  percentNonDrinkers: number;
-  eventHours: number;
-  startTime: string;
-  vibeLevel: VibeLevel;
-  earlyExitRate: number;
-  state: string;
-  onSiteLodging: boolean;
-  barType: BarType;
-  serviceStyle: ServiceStyle;
-}
+// ─── Default State ────────────────────────────────────────────────────────────
 
-const DEFAULTS: FormInputs = {
+const SHARED_DEFAULTS: SharedInputs = {
   totalGuests: 100,
   percentNonDrinkers: 0.2,
   eventHours: 5,
   startTime: "17:00",
   vibeLevel: "standard",
   earlyExitRate: 0.1,
+};
+
+const DIY_DEFAULTS: DiyInputs = {
   state: "Texas",
   onSiteLodging: false,
   barType: "full",
   serviceStyle: "bartender",
 };
 
-export default function App() {
-  const [inputs, setInputs] = useState<FormInputs>(DEFAULTS);
+const PACKAGE_DEFAULTS: VenuePackage[] = [
+  { id: "pkg-1", name: "Beer & Wine", tier: "beer_wine", pricePerPerson: 18 },
+  { id: "pkg-2", name: "Full Bar", tier: "full", pricePerPerson: 28 },
+  { id: "pkg-3", name: "Premium Open Bar", tier: "premium_spirits", pricePerPerson: 38 },
+];
 
-  const result: BarOutput | null = useMemo(() => {
+// ─── App ──────────────────────────────────────────────────────────────────────
+
+export default function App() {
+  const [mode, setMode] = useState<Mode>("venue");
+  const [shared, setShared] = useState<SharedInputs>(SHARED_DEFAULTS);
+  const [diy, setDiy] = useState<DiyInputs>(DIY_DEFAULTS);
+  const [packages, setPackages] = useState<VenuePackage[]>(PACKAGE_DEFAULTS);
+
+  const barResult: BarOutput | null = useMemo(() => {
+    if (mode !== "diy") return null;
     try {
-      return calculateBar(inputs);
+      return calculateBar({ ...shared, ...diy });
     } catch (e) {
       if (e instanceof ValidationError) return null;
       throw e;
     }
-  }, [inputs]);
+  }, [mode, shared, diy]);
+
+  const packageResult: PackageOutput | null = useMemo(() => {
+    if (mode !== "venue") return null;
+    try {
+      return calculatePackages({ ...shared, packages });
+    } catch (e) {
+      if (e instanceof ValidationError) return null;
+      throw e;
+    }
+  }, [mode, shared, packages]);
 
   return (
     <div className="layout">
@@ -50,14 +67,26 @@ export default function App() {
           <p className="eyebrow">DIY Wedding Logistics Kit</p>
           <h1>Bar Edition Calculator</h1>
           <p className="subhead">
-            Fill in your event details — quantities update instantly as you go.
+            Fill in your event details — results update instantly as you go.
           </p>
         </div>
       </header>
 
+      <div className="mode-bar">
+        <ModeToggle mode={mode} onChange={setMode} />
+      </div>
+
       <div className="content">
-        <BarForm inputs={inputs} onChange={setInputs} />
-        <BarResults result={result} />
+        <form className="bar-form" onSubmit={(e) => e.preventDefault()}>
+          <SharedEventForm inputs={shared} onChange={setShared} />
+          {mode === "diy" && <DiyBarForm inputs={diy} onChange={setDiy} />}
+          {mode === "venue" && <PackageForm packages={packages} onChange={setPackages} />}
+        </form>
+
+        {mode === "diy"
+          ? <BarResults result={barResult} />
+          : <PackageResults result={packageResult} />
+        }
       </div>
 
       <footer className="site-footer">

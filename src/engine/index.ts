@@ -53,3 +53,15 @@ export function calculateBar(inputs: unknown): BarOutput {
 // Re-export public types and errors for consumers of this package
 export type { BarInputs, BarOutput } from "./types.js";
 export { ValidationError } from "./types.js";
+
+// Package comparison (Use Case A)
+export { calculatePackages } from "./packages.js";
+export type {
+  PackageInputs,
+  PackageOutput,
+  PackageAnalysis,
+  VenuePackage,
+  PackageTier,
+  PackageVerdict,
+  PackageMode,
+} from "./types.js";
