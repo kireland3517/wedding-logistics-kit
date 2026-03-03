@@ -24,14 +24,18 @@ Results update instantly as you change any input. No submit button.
 
 ---
 
-## How to use the download
+## How to use it
+
+### Hosted PWA (recommended)
+Deploy `ui/dist/` to any static host (GitHub Pages, Netlify, Vercel). The app is installable from the browser and works fully offline after the first load.
+
+### Downloadable single file
+Run `npm run build:single` to produce a single self-contained `ui/dist/index.html` — no server needed, works from the filesystem.
 
 1. Open `dist/index.html` in any browser
 2. Fill in your event details
 3. Switch between modes with the tabs at the top
 4. Use **Print / Save as PDF** to save your results
-
-That's it. The file works offline and requires nothing else.
 
 ---
 
@@ -58,9 +62,12 @@ wedding-logistics-kit/
 │   │   ├── BarResults.tsx       # DIY shopping list output
 │   │   ├── PackageResults.tsx   # Package comparison table / single eval
 │   │   └── index.css
-│   ├── dist/
-│   │   └── index.html           # The distributable — fully self-contained
-│   └── vite.config.ts
+│   ├── public/
+│   │   ├── pwa-192x192.png      # App icon (replace with real icon)
+│   │   └── pwa-512x512.png      # App icon (replace with real icon)
+│   ├── dist/                    # Build output (not committed)
+│   ├── vite.config.ts           # PWA build (default)
+│   └── vite.config.single.ts   # Single-file build
 └── package.json
 ```
 
@@ -128,11 +135,17 @@ npm run build      # compile to dist/
 ```bash
 cd ui
 npm install
-npm run dev        # local dev server at localhost:5173
-npm run build      # produces ui/dist/index.html (single self-contained file)
+npm run dev          # local dev server at localhost:5173
+npm run build        # PWA build → ui/dist/ (manifest, service worker, chunked assets)
+npm run build:single # Single-file build → ui/dist/index.html (self-contained, no server needed)
+npm run preview      # Preview the PWA build locally
 ```
 
 The UI imports the engine source directly via the `@engine` path alias — no separate engine build step needed for UI development.
+
+**Deploying the PWA:** copy `ui/dist/` to any static host that serves over HTTPS. GitHub Pages, Netlify, and Vercel all work out of the box.
+
+**Icons:** replace `ui/public/pwa-192x192.png` and `ui/public/pwa-512x512.png` with your actual app icon before deploying.
 
 ---
 
@@ -143,4 +156,5 @@ The UI imports the engine source directly via the `@engine` path alias — no se
 | Engine | TypeScript 5, strict mode |
 | Tests | Vitest |
 | UI | React 19, Vite 7 |
-| Distribution | `vite-plugin-singlefile` — inlines all JS/CSS into one HTML file |
+| PWA | `vite-plugin-pwa` + Workbox — manifest, service worker, offline caching |
+| Single-file download | `vite-plugin-singlefile` — inlines all JS/CSS into one HTML file |
