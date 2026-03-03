@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:single": "vite build --config vite.config.single.ts",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -13,11 +14,12 @@
     "react-dom": "^19"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4",
     "typescript": "^5",
     "vite": "^7",
+    "vite-plugin-pwa": "^1.2.0",
     "vite-plugin-singlefile": "^2"
   }
 }
